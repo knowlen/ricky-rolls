@@ -2,7 +2,7 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -225,6 +225,78 @@ def aggregate_page(request: Request, db: sqlite3.Connection = Depends(get_db)):
             "last_updated": last_updated,
             "nav_page": "aggregate",
         },
+    )
+
+
+@router.get("/chart/{chart_type}")
+def chart_page(
+    chart_type: str,
+    request: Request,
+    all: int = 0,
+    db: sqlite3.Connection = Depends(get_db),
+):
+    valid_types = {"paired-bar", "boxplot", "trophy-scatter"}
+    if chart_type not in valid_types:
+        raise HTTPException(status_code=404, detail="Unknown chart type")
+
+    officer = get_current_officer(request)
+
+    if all:
+        # Aggregate scope
+        matchups = db.execute(
+            "SELECT m.id, m.officer_id, m.defender_id, m.wins_control, m.wins_ricky, "
+            "m.losses_control, m.losses_ricky, "
+            "o.name AS officer_name, d.name AS defender_name, "
+            "d.trophies AS defender_trophies "
+            "FROM matchups m "
+            "JOIN officers o ON o.id = m.officer_id "
+            "JOIN defenders d ON d.id = m.defender_id"
+        ).fetchall()
+        matchups = [dict(row) for row in matchups]
+
+        officer_rows = db.execute(
+            "SELECT DISTINCT o.id, o.name "
+            "FROM officers o "
+            "INNER JOIN matchups m ON m.officer_id = o.id "
+            "ORDER BY o.id"
+        ).fetchall()
+        officer_colors = {
+            row["name"]: DATA_COLORS[i % len(DATA_COLORS)]
+            for i, row in enumerate(officer_rows)
+        }
+
+        if chart_type == "boxplot":
+            chart_json = build_wr_boxplot(matchups, officer_colors=officer_colors)
+        else:
+            chart_json = build_trophy_scatter(matchups, officer_colors=officer_colors)
+        back_url = "/aggregate"
+    else:
+        # Per-officer scope
+        if not officer:
+            return RedirectResponse(url="/", status_code=302)
+
+        matchups = db.execute(
+            "SELECT m.id, m.officer_id, m.defender_id, m.wins_control, m.wins_ricky, "
+            "m.losses_control, m.losses_ricky, "
+            "d.name AS defender_name, d.trophies AS defender_trophies "
+            "FROM matchups m "
+            "JOIN defenders d ON d.id = m.defender_id "
+            "WHERE m.officer_id = ?",
+            (officer["id"],),
+        ).fetchall()
+        matchups = [dict(row) for row in matchups]
+        for m in matchups:
+            m["officer_name"] = officer["name"]
+
+        if chart_type == "paired-bar":
+            chart_json = build_paired_bar(matchups)
+        else:
+            chart_json = build_trophy_scatter(matchups)
+        back_url = "/results"
+
+    return templates.TemplateResponse(
+        "chart.html",
+        {"request": request, "chart_json": chart_json, "back_url": back_url},
     )
 
 

@@ -16,13 +16,6 @@ function post(url, body) {
   });
 }
 
-function openFullscreen(el) {
-    if (el.requestFullscreen) return el.requestFullscreen();
-    if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
-    if (el.webkitEnterFullscreen) return el.webkitEnterFullscreen();
-    return Promise.reject("Fullscreen not supported");
-}
-
 /* ── Plotly charts (all pages) ── */
 function renderCharts() {
   const isMobile = window.innerWidth < 600;
@@ -47,39 +40,19 @@ function renderCharts() {
       });
 
       if (isMobile) {
-        const expandBtn = document.createElement("button");
-        expandBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1h5v5M6 15H1v-5M15 1L9.5 6.5M1 15l5.5-5.5"/></svg>';
-        expandBtn.className = "chart-expand-btn";
+        const chartType = containerId.replace("-container", "");
+        const isAggregate = document.body.dataset.page === "aggregate";
+        const link = document.createElement("a");
+        link.href = "/chart/" + chartType + (isAggregate ? "?all=1" : "");
+        link.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M10 1h5v5M6 15H1v-5M15 1L9.5 6.5M1 15l5.5-5.5"/></svg>';
+        link.className = "chart-expand-btn";
         container.style.position = "relative";
-        container.appendChild(expandBtn);
-
-        expandBtn.addEventListener("click", () => {
-          openFullscreen(container).then(() => {
-            container.classList.add("chart-fullscreen");
-            Plotly.relayout(container, {
-              width: screen.height,
-              height: screen.width,
-              margin: { l: 50, r: 20, t: 50, b: 50 },
-              showlegend: true,
-            });
-          });
-        });
+        container.appendChild(link);
       }
     } catch (_) {
       /* skip malformed chart data */
     }
   });
-
-  function onFullscreenExit() {
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-      document.querySelectorAll(".chart-fullscreen").forEach((c) => {
-        c.classList.remove("chart-fullscreen");
-        Plotly.relayout(c, { width: null, height: null, showlegend: false });
-      });
-    }
-  }
-  document.addEventListener("fullscreenchange", onFullscreenExit);
-  document.addEventListener("webkitfullscreenchange", onFullscreenExit);
 }
 
 /* ── Login page ── */

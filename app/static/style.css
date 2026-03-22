@@ -466,6 +466,9 @@ table input, table select {
     color: var(--muted);
     cursor: pointer;
     line-height: 0;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
 }
 .chart-expand-btn:hover {
     opacity: 1;
@@ -474,15 +477,4 @@ table input, table select {
 
 @media (min-width: 601px) {
     .chart-expand-btn { display: none; }
-}
-
-.chart-fullscreen {
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform: rotate(90deg);
-    transform-origin: center center;
-    width: 100vh;
-    height: 100vw;
 }

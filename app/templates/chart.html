@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="darkreader-lock">
+    <title>Ricky Rolls</title>
+    <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/webp" href="/static/logo.webp">
+    <style>
+        body { margin: 0; background: #000; }
+        .chart-page { display: flex; flex-direction: column; height: 100dvh; }
+        .chart-toolbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; font-size: 12px; color: var(--muted);
+            font-family: var(--font);
+        }
+        .chart-toolbar a { color: var(--accent); text-decoration: none; font-family: var(--font); }
+        .chart-toolbar a:hover { color: var(--primary); }
+        #chart { flex: 1; min-height: 0; }
+    </style>
+</head>
+<body data-page="chart">
+    <div class="chart-page">
+        <div class="chart-toolbar">
+            <a href="{{ back_url }}">&larr; back</a>
+            <span>rotate for best view</span>
+        </div>
+        <div id="chart"></div>
+        <script type="application/json" id="chart-data">{{ chart_json | safe }}</script>
+    </div>
+    <script>
+        var tag = document.getElementById("chart-data");
+        var spec = JSON.parse(tag.textContent);
+        var layout = spec.layout || {};
+        layout.margin = { l: 50, r: 20, t: 40, b: 50 };
+        layout.showlegend = true;
+        Plotly.newPlot("chart", spec.data || [], layout, {
+            responsive: true, displayModeBar: false, scrollZoom: false
+        });
+    </script>
+</body>
+</html>

@@ -30,6 +30,7 @@ CHART_LAYOUT = dict(
     ),
     margin=dict(l=60, r=20, t=40, b=40),
     dragmode=False,
+    hovermode="closest",
 )
 
 DATA_COLORS = ["#ff9800", "#3498db", "#9c27b0", "#00bcd4", "#e6c730", "#e84393", "#808080"]
@@ -107,8 +108,9 @@ def build_paired_bar(matchups: Sequence[Any]) -> str:
         ricky_wrs.append(wr / (wr + lr) * 100 if (wr + lr) > 0 else 0)
 
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=names, y=ctrl_wrs, name="control", marker_color="#808080"))
-    fig.add_trace(go.Bar(x=names, y=ricky_wrs, name="ricky", marker_color=ACCENT))
+    _hl = dict(bgcolor="#1a1a1a", bordercolor="#404040", font=dict(family="JetBrains Mono", color="#ffffff"))
+    fig.add_trace(go.Bar(x=names, y=ctrl_wrs, name="control", marker_color="#808080", hoverlabel=_hl))
+    fig.add_trace(go.Bar(x=names, y=ricky_wrs, name="ricky", marker_color=ACCENT, hoverlabel=_hl))
 
     fig.update_layout(**CHART_LAYOUT)
     fig.update_layout(
@@ -157,6 +159,7 @@ def build_wr_boxplot(
                 fillcolor=fill,
                 line=dict(color=color),
                 marker=dict(color=color),
+                hoverlabel=dict(bgcolor="#1a1a1a", bordercolor="#404040", font=dict(family="JetBrains Mono", color="#ffffff")),
             )
         )
 
@@ -169,6 +172,7 @@ def build_wr_boxplot(
             fillcolor="rgba(128,128,128,0.5)",
             line=dict(color="#808080"),
             marker=dict(color="#808080"),
+            hoverlabel=dict(bgcolor="#1a1a1a", bordercolor="#404040", font=dict(family="JetBrains Mono", color="#ffffff")),
         )
     )
 
@@ -246,6 +250,7 @@ def build_trophy_scatter(
                 text=hover,
                 hoverinfo="text",
                 marker=dict(color=color, opacity=0.8),
+                hoverlabel=dict(bgcolor="#1a1a1a", bordercolor="#404040", font=dict(family="JetBrains Mono", color="#ffffff")),
             )
         )
 

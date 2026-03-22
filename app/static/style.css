@@ -443,7 +443,6 @@ table input, table select {
         order: 1;
         width: 100%;
         justify-content: center;
-        border-bottom: 1px solid var(--border);
         padding-bottom: 0.5rem;
     }
     .nav-user {
@@ -452,4 +451,31 @@ table input, table select {
         justify-content: flex-end;
         padding: 0.25rem 0;
     }
+}
+
+/* Fullscreen chart expand button */
+.chart-expand-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 10px;
+    z-index: 10;
+    padding: 4px 10px;
+    opacity: 0.6;
+}
+.chart-expand-btn:hover { opacity: 1; }
+
+@media (min-width: 601px) {
+    .chart-expand-btn { display: none; }
+}
+
+.chart-fullscreen {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(90deg);
+    transform-origin: center center;
+    width: 100vh;
+    height: 100vw;
 }

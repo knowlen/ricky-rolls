@@ -18,6 +18,8 @@ function post(url, body) {
 
 /* ── Plotly charts (all pages) ── */
 function renderCharts() {
+  const isMobile = window.innerWidth < 600;
+
   document.querySelectorAll('script[type="application/json"]').forEach((tag) => {
     if (!tag.id || !tag.id.endsWith("-data")) return;
     const containerId = tag.id.replace("-data", "-container");
@@ -25,13 +27,51 @@ function renderCharts() {
     if (!container) return;
     try {
       const spec = JSON.parse(tag.textContent);
-      Plotly.newPlot(container, spec.data || [], spec.layout || {}, {
+      const layout = spec.layout || {};
+      if (isMobile) {
+        layout.margin = { l: 40, r: 10, t: 40, b: 50 };
+        layout.showlegend = false;
+        layout.font = { ...(layout.font || {}), size: 10 };
+      }
+      Plotly.newPlot(container, spec.data || [], layout, {
         responsive: true,
         displayModeBar: false,
         scrollZoom: false,
       });
+
+      if (isMobile) {
+        const expandBtn = document.createElement("button");
+        expandBtn.textContent = "expand";
+        expandBtn.className = "btn-neutral chart-expand-btn";
+        container.style.position = "relative";
+        container.appendChild(expandBtn);
+
+        expandBtn.addEventListener("click", () => {
+          const goFullscreen = container.requestFullscreen
+            || container.webkitRequestFullscreen;
+          if (!goFullscreen) return;
+          goFullscreen.call(container).then(() => {
+            container.classList.add("chart-fullscreen");
+            Plotly.relayout(container, {
+              width: screen.height,
+              height: screen.width,
+              margin: { l: 50, r: 20, t: 50, b: 50 },
+              showlegend: true,
+            });
+          });
+        });
+      }
     } catch (_) {
       /* skip malformed chart data */
+    }
+  });
+
+  document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) {
+      document.querySelectorAll(".chart-fullscreen").forEach((c) => {
+        c.classList.remove("chart-fullscreen");
+        Plotly.relayout(c, { width: null, height: null, showlegend: false });
+      });
     }
   });
 }

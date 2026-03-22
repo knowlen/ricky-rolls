@@ -15,7 +15,7 @@ build/
 .pytest_cache/
 .claude/
 .knowledge/
-CLAUDE.local.md
+CLAUDE*.md
 *.pyc
 *.pyo
 *.log

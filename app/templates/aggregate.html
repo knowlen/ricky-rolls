@@ -23,15 +23,7 @@
 {% set total_officers = per_officer_stats | length %}
 
 <h3>verdict</h3>
-{% if total_officers > 0 %}
 <div class="info-box">
-    <h4>direction agreement</h4>
-    <p><span class="{{ 'positive' if improved_officers|length > total_officers / 2 else 'negative' if improved_officers|length < total_officers / 2 else '' }}">{{ improved_officers|length }}/{{ total_officers }}</span> attackers ({{ "%.0f"|format(improved_officers|length / total_officers * 100) }}%) saw ricky improve their win rate.</p>
-</div>
-{% endif %}
-
-<div class="info-box">
-    <h4>pooled wilcoxon signed-rank test</h4>
     {% if 'improves' in pooled_wilcoxon.interpretation %}
     <p>ricky significantly <strong class="positive">improves</strong> win rate</p>
     {% elif 'hurts' in pooled_wilcoxon.interpretation %}
@@ -40,15 +32,21 @@
     <p>{{ pooled_wilcoxon.interpretation }}</p>
     {% endif %}
     {% if pooled_wilcoxon.p_value is not none %}
-    <p><small>p-value: {{ "%.4f"|format(pooled_wilcoxon.p_value) }} | pairs: {{ pooled_wilcoxon.n_pairs }} ({{ pooled_wilcoxon.n_nonzero }} non-tied)</small></p>
+    <p><small><span title="pooled wilcoxon signed-rank test">p-value</span>: {{ "%.4f"|format(pooled_wilcoxon.p_value) }} | pairs: {{ pooled_wilcoxon.n_pairs }} ({{ pooled_wilcoxon.n_nonzero }} non-tied)</small></p>
     {% endif %}
 </div>
+
+{% if total_officers > 0 %}
+<div class="info-box">
+    <p><span class="{{ 'positive' if improved_officers|length > total_officers / 2 else 'negative' if improved_officers|length < total_officers / 2 else '' }}">{{ improved_officers|length }}/{{ total_officers }}</span> attackers ({{ "%.0f"|format(improved_officers|length / total_officers * 100) }}%) saw ricky improve their win rate.</p>
+</div>
+{% endif %}
 
 {% if n_incomplete > 0 %}
 <div class="warning info-box">{{ n_incomplete }} matchup{{ 's' if n_incomplete != 1 }} ha{{ 's' if n_incomplete == 1 else 've' }} data but aren't included in analysis yet (need 5+ fights per condition).</div>
 {% endif %}
 
-<h3>per-attacker summary</h3>
+<h3>stats</h3>
 <div class="table-wrap">
     <table>
         <thead>
@@ -58,7 +56,7 @@
                 <th>ricky replaces</th>
                 <th>matchups completed</th>
                 <th>mean wr diff</th>
-                <th>p-value</th>
+                <th title="pooled wilcoxon signed-rank test">p-value</th>
             </tr>
         </thead>
         <tbody>
@@ -78,21 +76,18 @@
     </table>
 </div>
 
-<h3>pooled statistics</h3>
 <div class="table-wrap">
     <table>
         <thead>
             <tr>
-                <th>attacker</th>
-                <th>completed</th>
+                <th style="text-align: center;">total fights</th>
                 <th>mean wr diff</th>
-                <th>p-value</th>
+                <th title="pooled wilcoxon signed-rank test">p-value</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>pooled</td>
-                <td>{{ pooled_stats.completed }}</td>
+                <td style="text-align: center;">{{ all_matchups | sum(attribute='wins_control') + all_matchups | sum(attribute='losses_control') + all_matchups | sum(attribute='wins_ricky') + all_matchups | sum(attribute='losses_ricky') }}</td>
                 <td class="{{ 'positive' if pooled_stats.mean_diff > 0 else 'negative' if pooled_stats.mean_diff < 0 else '' }}">{{ "%+.1f"|format(pooled_stats.mean_diff * 100) }}%</td>
                 <td>{% if pooled_wilcoxon.p_value is not none %}{{ "%.4f"|format(pooled_wilcoxon.p_value) }}{% else %}n/a{% endif %}</td>
             </tr>

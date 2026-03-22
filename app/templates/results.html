@@ -18,13 +18,6 @@
 <div class="warning info-box">{{ n_incomplete }} matchup{{ 's' if n_incomplete != 1 }} ha{{ 's' if n_incomplete == 1 else 've' }} data but aren't included in analysis yet (need 5+ fights per condition).</div>
 {% endif %}
 
-<div class="stat-grid">
-    <div class="stat-card"><div class="stat-label">matchups</div><div class="stat-value">{{ stats.completed }}</div></div>
-    <div class="stat-card"><div class="stat-label">control wr</div><div class="stat-value">{{ "%.1f"|format(stats.wr_control) }}%</div></div>
-    <div class="stat-card"><div class="stat-label">ricky wr</div><div class="stat-value">{{ "%.1f"|format(stats.wr_ricky) }}%</div></div>
-    <div class="stat-card"><div class="stat-label">mean wr diff</div><div class="stat-value {{ 'positive' if stats.mean_diff > 0 else 'negative' if stats.mean_diff < 0 else '' }}">{{ "%+.1f"|format(stats.mean_diff * 100) }}%</div></div>
-</div>
-
 {% set improved = [] %}
 {% set total_completed = [] %}
 {% for m in matchups %}
@@ -39,16 +32,16 @@
         {% endif %}
     {% endif %}
 {% endfor %}
+<h3>verdict</h3>
 <div class="info-box">
-    <p><strong>verdict:</strong> ricky gave a higher win rate in <span class="{{ 'positive' if improved|length > total_completed|length / 2 else 'negative' if improved|length < total_completed|length / 2 else '' }}">{{ improved|length }}/{{ total_completed|length }}</span> completed matchups.</p>
+    <p>{{ wilcoxon.interpretation }}</p>
+    {% if wilcoxon.p_value is not none %}
+    <p><small><span title="wilcoxon signed-rank test">p-value</span>: {{ "%.4f"|format(wilcoxon.p_value) }} | pairs: {{ wilcoxon.n_pairs }} ({{ wilcoxon.n_nonzero }} non-tied)</small></p>
+    {% endif %}
 </div>
 
 <div class="info-box">
-    <h3>wilcoxon signed-rank test</h3>
-    <p>{{ wilcoxon.interpretation }}</p>
-    {% if wilcoxon.p_value is not none %}
-    <p><small>p-value: {{ "%.4f"|format(wilcoxon.p_value) }} | pairs: {{ wilcoxon.n_pairs }} ({{ wilcoxon.n_nonzero }} non-tied)</small></p>
-    {% endif %}
+    <p>ricky gave a higher win rate in <span class="{{ 'positive' if improved|length > total_completed|length / 2 else 'negative' if improved|length < total_completed|length / 2 else '' }}">{{ improved|length }}/{{ total_completed|length }}</span> completed matchups.</p>
 </div>
 
 <div id="paired-bar-container"></div>
@@ -91,6 +84,27 @@
             </tr>
             {% endfor %}
         </tbody>
+        <tfoot>
+            {% set tw_c = matchups | sum(attribute='wins_control') %}
+            {% set tl_c = matchups | sum(attribute='losses_control') %}
+            {% set tw_r = matchups | sum(attribute='wins_ricky') %}
+            {% set tl_r = matchups | sum(attribute='losses_ricky') %}
+            {% set tt_c = tw_c + tl_c %}
+            {% set tt_r = tw_r + tl_r %}
+            {% set t_ctrl_wr = (tw_c / tt_c * 100) if tt_c > 0 else 0 %}
+            {% set t_rick_wr = (tw_r / tt_r * 100) if tt_r > 0 else 0 %}
+            {% set t_diff = t_rick_wr - t_ctrl_wr %}
+            <tr style="font-weight: bold;">
+                <td>total</td>
+                <td>{{ tw_c }}</td>
+                <td>{{ tl_c }}</td>
+                <td>{{ "%.0f"|format(t_ctrl_wr) if tt_c > 0 else "—" }}%</td>
+                <td>{{ tw_r }}</td>
+                <td>{{ tl_r }}</td>
+                <td>{{ "%.0f"|format(t_rick_wr) if tt_r > 0 else "—" }}%</td>
+                <td class="{{ 'positive' if t_diff > 0 else 'negative' if t_diff < 0 else '' }}">{{ "%+.0f"|format(t_diff) if (tt_c > 0 and tt_r > 0) else "—" }}%</td>
+            </tr>
+        </tfoot>
     </table>
 </div>
 

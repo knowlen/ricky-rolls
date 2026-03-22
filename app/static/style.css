@@ -456,14 +456,21 @@ table input, table select {
 /* Fullscreen chart expand button */
 .chart-expand-btn {
     position: absolute;
-    top: 8px;
+    bottom: 8px;
     right: 8px;
-    font-size: 10px;
     z-index: 10;
-    padding: 4px 10px;
-    opacity: 0.6;
+    padding: 6px;
+    opacity: 0.4;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 0;
 }
-.chart-expand-btn:hover { opacity: 1; }
+.chart-expand-btn:hover {
+    opacity: 1;
+    color: var(--primary);
+}
 
 @media (min-width: 601px) {
     .chart-expand-btn { display: none; }

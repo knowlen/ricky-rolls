@@ -159,7 +159,7 @@ def build_wr_boxplot(
                 fillcolor=fill,
                 line=dict(color=color),
                 marker=dict(color=color),
-                hoverlabel=dict(bgcolor="#1a1a1a", bordercolor="#404040", font=dict(family="JetBrains Mono", color="#ffffff")),
+                hoverinfo="skip",
             )
         )
 
@@ -172,7 +172,7 @@ def build_wr_boxplot(
             fillcolor="rgba(128,128,128,0.5)",
             line=dict(color="#808080"),
             marker=dict(color="#808080"),
-            hoverlabel=dict(bgcolor="#1a1a1a", bordercolor="#404040", font=dict(family="JetBrains Mono", color="#ffffff")),
+            hoverinfo="skip",
         )
     )
 
@@ -226,8 +226,8 @@ def build_trophy_scatter(
             xs.append(t)
             ys.append(diff)
             hover.append(
-                f"Defender: {m['defender_name']}<br>"
                 f"Attacker: {m['officer_name']}<br>"
+                f"Defender: {m['defender_name']}<br>"
                 f"Trophies: {t:,}<br>"
                 f"Ctrl WR: {ctrl_wr:.1%}<br>"
                 f"WR Diff: {diff:+.3f}"

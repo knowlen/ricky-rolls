@@ -17,7 +17,17 @@ CHART_LAYOUT = dict(
     font=dict(family="JetBrains Mono", color="#ffffff", size=12),
     xaxis=dict(gridcolor="#404040", linecolor="#404040", zerolinecolor="#404040", fixedrange=True),
     yaxis=dict(gridcolor="#404040", linecolor="#404040", zerolinecolor="#404040", fixedrange=True),
-    legend=dict(font=dict(color="#ffffff")),
+    hoverlabel=dict(
+        bgcolor="#1a1a1a",
+        bordercolor="#404040",
+        font=dict(family="JetBrains Mono", color="#ffffff", size=12),
+    ),
+    legend=dict(
+        font=dict(color="#ffffff"),
+        bgcolor="rgba(0,0,0,0)",
+        bordercolor="#404040",
+        borderwidth=0,
+    ),
     margin=dict(l=60, r=20, t=40, b=40),
     dragmode=False,
 )

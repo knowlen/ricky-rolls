@@ -163,15 +163,26 @@ def aggregate_page(request: Request, db: sqlite3.Connection = Depends(get_db)):
         per_officer_stats[name] = compute_stats(matchups)
         per_officer_wilcoxon[name] = run_wilcoxon(matchups)
 
-    # Build officer_colors: consistent color assignment by officer id order
+    # Build officer_colors and officer_meta: consistent color assignment by officer id order
     officer_rows = db.execute(
-        "SELECT DISTINCT o.id, o.name FROM officers o "
+        "SELECT DISTINCT o.id, o.name, o.comp, o.ricky_replaces, "
+        "COUNT(m.id) AS matchup_count "
+        "FROM officers o "
         "INNER JOIN matchups m ON m.officer_id = o.id "
+        "GROUP BY o.id "
         "ORDER BY o.id"
     ).fetchall()
     officer_colors = {
         row["name"]: DATA_COLORS[i % len(DATA_COLORS)]
         for i, row in enumerate(officer_rows)
+    }
+    officer_meta = {
+        row["name"]: {
+            "comp": row["comp"],
+            "ricky_replaces": row["ricky_replaces"],
+            "matchup_count": row["matchup_count"],
+        }
+        for row in officer_rows
     }
 
     # Pooled stats across all matchups
@@ -210,6 +221,7 @@ def aggregate_page(request: Request, db: sqlite3.Connection = Depends(get_db)):
             "trophy_scatter_json": trophy_scatter_json,
             "n_incomplete": n_incomplete,
             "officer_colors": officer_colors,
+            "officer_meta": officer_meta,
             "last_updated": last_updated,
             "nav_page": "aggregate",
         },
@@ -226,6 +238,15 @@ def admin_page(request: Request, db: sqlite3.Connection = Depends(get_db)):
         if key != settings.ADMIN_KEY:
             return RedirectResponse(url="/", status_code=302)
         request.session["is_admin"] = True
+
+    officers = db.execute(
+        "SELECT o.id, o.name, o.comp, o.ricky_replaces, COUNT(m.id) as matchup_count "
+        "FROM officers o "
+        "LEFT JOIN matchups m ON m.officer_id = o.id "
+        "GROUP BY o.id "
+        "ORDER BY o.name"
+    ).fetchall()
+    officers = [dict(o) for o in officers]
 
     defenders = db.execute(
         "SELECT id, name, code, comp, trophies, created_at FROM defenders ORDER BY name"
@@ -249,6 +270,7 @@ def admin_page(request: Request, db: sqlite3.Connection = Depends(get_db)):
         {
             "request": request,
             "officer": officer,
+            "officers": officers,
             "defenders": defenders,
             "matchups": matchups,
             "nav_page": "admin",

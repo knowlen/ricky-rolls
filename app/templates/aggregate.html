@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="page-header">
-    <h1>aggregate</h1>
     <div class="page-header-right">
         <span>last updated: {{ last_updated or 'never' }}</span>
         <a href="/aggregate" class="btn-neutral">refresh</a>
@@ -15,71 +14,6 @@
 <p>no data yet. attackers need to enter matchup results first.</p>
 {% else %}
 
-{% if n_incomplete > 0 %}
-<div class="warning info-box">{{ n_incomplete }} matchup{{ 's' if n_incomplete != 1 }} ha{{ 's' if n_incomplete == 1 else 've' }} data but aren't included in analysis yet (need 5+ fights per condition).</div>
-{% endif %}
-
-<h3>per-attacker summary</h3>
-<div class="table-wrap">
-    <table>
-        <thead>
-            <tr>
-                <th>attacker</th>
-                <th>completed</th>
-                <th>mean wr diff</th>
-                <th>control wr%</th>
-                <th>ricky wr%</th>
-                <th>wilcoxon p-value</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for name, stats in per_officer_stats.items() %}
-            {% set w = per_officer_wilcoxon.get(name, {}) %}
-            <tr>
-                <td><span class="officer-dot" style="background: {{ officer_colors.get(name, '#808080') }}"></span>{{ name }}</td>
-                <td>{{ stats.completed }}</td>
-                <td class="{{ 'positive' if stats.mean_diff > 0 else 'negative' if stats.mean_diff < 0 else '' }}">{{ "%+.1f"|format(stats.mean_diff * 100) }}%</td>
-                <td>{{ "%.1f"|format(stats.wr_control) }}%</td>
-                <td>{{ "%.1f"|format(stats.wr_ricky) }}%</td>
-                <td>{% if w.p_value is not none %}{{ "%.4f"|format(w.p_value) }}{% else %}n/a{% endif %}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<h3>pooled statistics</h3>
-<div class="table-wrap">
-    <table>
-        <thead>
-            <tr>
-                <th>attacker</th>
-                <th>completed</th>
-                <th>mean wr diff</th>
-                <th>control wr%</th>
-                <th>ricky wr%</th>
-                <th>wilcoxon p-value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>pooled</td>
-                <td>{{ pooled_stats.completed }}</td>
-                <td class="{{ 'positive' if pooled_stats.mean_diff > 0 else 'negative' if pooled_stats.mean_diff < 0 else '' }}">{{ "%+.1f"|format(pooled_stats.mean_diff * 100) }}%</td>
-                <td>{{ "%.1f"|format(pooled_stats.wr_control) }}%</td>
-                <td>{{ "%.1f"|format(pooled_stats.wr_ricky) }}%</td>
-                <td>{% if pooled_wilcoxon.p_value is not none %}{{ "%.4f"|format(pooled_wilcoxon.p_value) }}{% else %}n/a{% endif %}</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-<div id="boxplot-container"></div>
-<script type="application/json" id="boxplot-data">{{ boxplot_json | safe }}</script>
-
-<div id="trophy-scatter-container"></div>
-<script type="application/json" id="trophy-scatter-data">{{ trophy_scatter_json | safe }}</script>
-
 {% set improved_officers = [] %}
 {% for name, stats in per_officer_stats.items() %}
     {% if stats.mean_diff > 0 %}
@@ -88,7 +22,7 @@
 {% endfor %}
 {% set total_officers = per_officer_stats | length %}
 
-<h3>results</h3>
+<h3>verdict</h3>
 <div class="results-viewport">
 {% if total_officers > 0 %}
 <div class="info-box">
@@ -111,6 +45,68 @@
     {% endif %}
 </div>
 </div>
+
+{% if n_incomplete > 0 %}
+<div class="warning info-box">{{ n_incomplete }} matchup{{ 's' if n_incomplete != 1 }} ha{{ 's' if n_incomplete == 1 else 've' }} data but aren't included in analysis yet (need 5+ fights per condition).</div>
+{% endif %}
+
+<h3>per-attacker summary</h3>
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>attacker</th>
+                <th>comp</th>
+                <th>ricky replaces</th>
+                <th>matchups completed</th>
+                <th>mean wr diff</th>
+                <th>p-value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for name, stats in per_officer_stats.items() %}
+            {% set w = per_officer_wilcoxon.get(name, {}) %}
+            {% set meta = officer_meta.get(name, {}) %}
+            <tr>
+                <td><span class="officer-dot" style="background: {{ officer_colors.get(name, '#808080') }}"></span>{{ name }}</td>
+                <td>{{ meta.get('comp') or '—' }}</td>
+                <td>{{ meta.get('ricky_replaces') or '—' }}</td>
+                <td>{{ stats.completed }}</td>
+                <td class="{{ 'positive' if stats.mean_diff > 0 else 'negative' if stats.mean_diff < 0 else '' }}">{{ "%+.1f"|format(stats.mean_diff * 100) }}%</td>
+                <td>{% if w.p_value is not none %}{{ "%.4f"|format(w.p_value) }}{% else %}n/a{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h3>pooled statistics</h3>
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>attacker</th>
+                <th>completed</th>
+                <th>mean wr diff</th>
+                <th>p-value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>pooled</td>
+                <td>{{ pooled_stats.completed }}</td>
+                <td class="{{ 'positive' if pooled_stats.mean_diff > 0 else 'negative' if pooled_stats.mean_diff < 0 else '' }}">{{ "%+.1f"|format(pooled_stats.mean_diff * 100) }}%</td>
+                <td>{% if pooled_wilcoxon.p_value is not none %}{{ "%.4f"|format(pooled_wilcoxon.p_value) }}{% else %}n/a{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div id="boxplot-container"></div>
+<script type="application/json" id="boxplot-data">{{ boxplot_json | safe }}</script>
+
+<div id="trophy-scatter-container"></div>
+<script type="application/json" id="trophy-scatter-data">{{ trophy_scatter_json | safe }}</script>
 
 {% endif %}
 {% endblock %}

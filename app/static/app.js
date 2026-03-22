@@ -299,6 +299,24 @@ function initAdmin() {
     });
   });
 
+  /* Delete attacker */
+  document.querySelectorAll(".attacker-delete-btn").forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const row = btn.closest("tr");
+      const id = row.dataset.attackerId;
+      if (!confirm("Delete this attacker and all their matchup data?")) return;
+      const res = await fetch(`/api/admin/attacker/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) location.reload();
+      else {
+        const data = await res.json();
+        alert(data.detail || "Error deleting attacker");
+      }
+    });
+  });
+
   /* Edit defender, toggle inline editing */
   document.querySelectorAll(".edit-btn").forEach((btn) => {
     btn.addEventListener("click", () => {

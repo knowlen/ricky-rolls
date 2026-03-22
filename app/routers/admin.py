@@ -2,7 +2,7 @@ import csv
 import io
 import sqlite3
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
 from app.dependencies import get_db, require_admin
@@ -77,6 +77,27 @@ def delete_defender(
         raise HTTPException(status_code=404, detail="Defender not found")
 
     db.execute("DELETE FROM defenders WHERE id = ?", (defender_id,))
+
+    return {"success": True}
+
+
+@router.delete("/attacker/{officer_id}")
+def delete_attacker(
+    officer_id: int,
+    request: Request,
+    db: sqlite3.Connection = Depends(get_db),
+):
+    if officer_id == request.session.get("officer_id"):
+        raise HTTPException(status_code=400, detail="cannot delete yourself")
+
+    existing = db.execute(
+        "SELECT id FROM officers WHERE id = ?", (officer_id,)
+    ).fetchone()
+    if not existing:
+        raise HTTPException(status_code=404, detail="Attacker not found")
+
+    db.execute("DELETE FROM matchups WHERE officer_id = ?", (officer_id,))
+    db.execute("DELETE FROM officers WHERE id = ?", (officer_id,))
 
     return {"success": True}
 

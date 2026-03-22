@@ -6,6 +6,36 @@
 <h1>admin</h1>
 
 <section>
+    <h3>attackers</h3>
+    <figure>
+        <table id="attackers-table">
+            <thead>
+                <tr>
+                    <th>attacker</th>
+                    <th>comp</th>
+                    <th>ricky replaces</th>
+                    <th>matchups</th>
+                    <th>actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for o in officers %}
+                <tr data-attacker-id="{{ o.id }}">
+                    <td>{{ o.name }}</td>
+                    <td>{{ o.comp or "—" }}</td>
+                    <td>{{ o.ricky_replaces or "—" }}</td>
+                    <td>{{ o.matchup_count }}</td>
+                    <td>
+                        <button class="btn-neutral attacker-delete-btn" data-action="delete">delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+</section>
+
+<section>
     <h3>defender management</h3>
 
     <form id="add-defender-form">

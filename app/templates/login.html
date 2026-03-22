@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block page_id %}login{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin: 2rem 0 1.5rem;">
+  <img src="/static/logo.webp" alt="ricky rolls" style="max-width: 200px; height: auto;">
+</div>
+
+<div class="info-box">
+    <h3>protocol</h3>
+    <div class="protocol-text">
+        <p><span class="protocol-step-num">1.</span> set your control team (without ricky)</p>
+        <p><span class="protocol-step-num">2.</span> optimize your positioning against their defense (~5 practice fights, don't record these)</p>
+        <p><span class="protocol-step-num">3.</span> lock your best position and fight 5 times, record wins and losses</p>
+        <p><span class="protocol-step-num">4.</span> swap ricky in (replacing your chosen hero)</p>
+        <p><span class="protocol-step-num">5.</span> optimize your ricky positioning against their defense (~5 practice fights, don't record these)</p>
+        <p><span class="protocol-step-num">6.</span> lock your best position and fight 5 times, record wins and losses</p>
+        <p><span class="protocol-step-num">7.</span> move to the next defender and repeat</p>
+    </div>
+    <p class="protocol-text"><small>we're testing team comp at its best, optimize placement before every measurement set.</small></p>
+</div>
+
+<form id="login-form">
+    <label for="name">attacker name</label>
+    <input type="text" id="name" name="name" placeholder="your attacker name" required>
+    <button type="submit" class="btn-accent">enter</button>
+    <p class="error"></p>
+</form>
+{% endblock %}

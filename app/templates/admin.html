@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block page_id %}admin{% endblock %}
+
+{% block content %}
+<h1>admin</h1>
+
+<section>
+    <h3>defender management</h3>
+
+    <form id="add-defender-form">
+        <fieldset role="group">
+            <input type="text" name="name" placeholder="defender name" required>
+            <input type="text" name="code" placeholder="code">
+            <input type="number" name="trophies" placeholder="trophies" min="0">
+            <button type="submit" class="btn-accent">add</button>
+        </fieldset>
+    </form>
+
+    <figure>
+        <table id="defenders-table">
+            <thead>
+                <tr>
+                    <th>name</th>
+                    <th>code</th>
+                    <th>trophies</th>
+                    <th>created</th>
+                    <th>actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in defenders %}
+                <tr data-defender-id="{{ d.id }}">
+                    <td class="defender-name">{{ d.name }}</td>
+                    <td class="defender-code">{{ d.code or '' }}</td>
+                    <td class="defender-trophies">{{ "{:,}".format(d.trophies) if d.trophies else "—" }}</td>
+                    <td>{{ d.created_at }}</td>
+                    <td>
+                        <button class="btn-neutral edit-btn" data-action="edit">edit</button>
+                        <button class="btn-neutral delete-btn" data-action="delete">delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+</section>
+
+<section>
+    <h3>raw data</h3>
+    <figure>
+        <table>
+            <thead>
+                <tr>
+                    <th>attacker</th>
+                    <th>defender</th>
+                    <th>ctrl wins</th>
+                    <th>ctrl losses</th>
+                    <th>ctrl wr</th>
+                    <th>ricky wins</th>
+                    <th>ricky losses</th>
+                    <th>ricky wr</th>
+                    <th>wr diff</th>
+                    <th>notes</th>
+                    <th>updated at</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in matchups %}
+                {% set wr_c = (m.wins_control / (m.wins_control + m.losses_control) * 100) if (m.wins_control + m.losses_control) > 0 else 0 %}
+                {% set wr_r = (m.wins_ricky / (m.wins_ricky + m.losses_ricky) * 100) if (m.wins_ricky + m.losses_ricky) > 0 else 0 %}
+                {% set wr_diff = wr_r - wr_c %}
+                <tr>
+                    <td>{{ m.officer_name }}</td>
+                    <td>{{ m.defender_name }}</td>
+                    <td>{{ m.wins_control }}</td>
+                    <td>{{ m.losses_control }}</td>
+                    <td>{{ "%.0f"|format(wr_c) }}%</td>
+                    <td>{{ m.wins_ricky }}</td>
+                    <td>{{ m.losses_ricky }}</td>
+                    <td>{{ "%.0f"|format(wr_r) }}%</td>
+                    <td>{{ "%+.0f"|format(wr_diff) }}%</td>
+                    <td>{{ m.notes or '' }}</td>
+                    <td>{{ m.updated_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+</section>
+
+<section>
+    <h3>export</h3>
+    <a href="/api/export/csv" class="btn-neutral">export csv</a>
+</section>
+{% endblock %}

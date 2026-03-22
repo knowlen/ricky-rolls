@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>Ricky Rolls</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.classless.min.css">
+    <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" type="image/webp" href="/static/logo.webp">
+</head>
+<body data-page="{% block page_id %}{% endblock %}">
+    <nav>
+        {% if officer %}
+        <div class="nav-tabs">
+            <a href="/enter" class="{{ 'active' if nav_page == 'enter' else '' }}">enter data</a>
+            <a href="/results" class="{{ 'active' if nav_page == 'results' else '' }}">my results</a>
+            <a href="/aggregate" class="{{ 'active' if nav_page == 'aggregate' else '' }}">aggregate</a>
+            {% if request.session.get('is_admin') %}
+            <a href="/admin" class="{{ 'active' if nav_page == 'admin' else '' }}">admin</a>
+            {% endif %}
+        </div>
+        <div class="nav-user">
+            <span class="nav-username">{{ officer.name }}</span>
+            <a href="/api/logout">switch account</a>
+        </div>
+        {% endif %}
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

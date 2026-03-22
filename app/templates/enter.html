@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block page_id %}enter{% endblock %}
+
+{% block content %}
+<fieldset>
+    <legend>your setup</legend>
+    <label for="comp">control comp</label>
+    <input type="text" id="comp" data-field="comp" value="{{ officer_meta.comp or '' }}" placeholder="eg; lumina, ragnar, shade, etc...">
+    <label for="ricky_replaces">ricky replaces</label>
+    <select id="ricky_replaces" data-field="ricky_replaces" data-initial="{{ officer_meta.ricky_replaces or '' }}">
+        <option value="">-- select --</option>
+    </select>
+</fieldset>
+
+{% set completed = [] %}
+{% set total = defenders | length %}
+{% for d in defenders %}
+    {% set wc = matchup_map.get(d.id, {}).get('wins_control', 0) or 0 %}
+    {% set lc = matchup_map.get(d.id, {}).get('losses_control', 0) or 0 %}
+    {% set wr = matchup_map.get(d.id, {}).get('wins_ricky', 0) or 0 %}
+    {% set lr = matchup_map.get(d.id, {}).get('losses_ricky', 0) or 0 %}
+    {% if (wc + lc) >= 5 and (wr + lr) >= 5 %}
+        {% if completed.append(1) %}{% endif %}
+    {% endif %}
+{% endfor %}
+<progress value="{{ completed | length }}" max="{{ total }}"></progress>
+<p class="progress-label" data-progress-label>{{ completed | length }}/{{ total }} matchups complete (5+ fights each condition)</p>
+<figure>
+    <div style="overflow-x: auto">
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2">defender</th>
+                <th rowspan="2" class="code-col">code</th>
+                <th colspan="3">control</th>
+                <th colspan="3" class="ricky-start">ricky</th>
+            </tr>
+            <tr>
+                <th>wins</th>
+                <th>losses</th>
+                <th>wr</th>
+                <th class="ricky-start">wins</th>
+                <th>losses</th>
+                <th>wr</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in defenders %}
+            {% set m = matchup_map.get(d.id, {}) %}
+            {% set wc = m.get('wins_control', 0) or 0 %}
+            {% set lc = m.get('losses_control', 0) or 0 %}
+            {% set wr_val = m.get('wins_ricky', 0) or 0 %}
+            {% set lr = m.get('losses_ricky', 0) or 0 %}
+            {% set ctrl_total = wc + lc %}
+            {% set ricky_total = wr_val + lr %}
+            {% set ctrl_wr = (wc / ctrl_total * 100) if ctrl_total > 0 else -1 %}
+            {% set ricky_wr = (wr_val / ricky_total * 100) if ricky_total > 0 else -1 %}
+            {% set wr_diff = ricky_wr - ctrl_wr %}
+            <tr data-defender-id="{{ d.id }}"
+                {% if ctrl_total >= 5 and ricky_total >= 5 %}
+                    {% if wr_diff > 0 %}
+                class="ricky-better"
+                    {% elif wr_diff < 0 %}
+                class="control-better"
+                    {% else %}
+                class="tied"
+                    {% endif %}
+                {% endif %}>
+                <td>{{ d.name }}</td>
+                <td class="code-col"><code>{{ d.code }}</code></td>
+                <td class="counter-cell">
+                    <div class="counter-widget">
+                        <button type="button" class="counter-btn decrement" data-field="wins_control">−</button>
+                        <span class="counter-value" data-field-display="wins_control">{{ wc }}</span>
+                        <button type="button" class="counter-btn increment" data-field="wins_control">+</button>
+                    </div>
+                </td>
+                <td class="counter-cell">
+                    <div class="counter-widget">
+                        <button type="button" class="counter-btn decrement" data-field="losses_control">−</button>
+                        <span class="counter-value" data-field-display="losses_control">{{ lc }}</span>
+                        <button type="button" class="counter-btn increment" data-field="losses_control">+</button>
+                    </div>
+                </td>
+                <td class="wr-cell" data-wr="control">—</td>
+                <td class="counter-cell ricky-start">
+                    <div class="counter-widget">
+                        <button type="button" class="counter-btn decrement" data-field="wins_ricky">−</button>
+                        <span class="counter-value" data-field-display="wins_ricky">{{ wr_val }}</span>
+                        <button type="button" class="counter-btn increment" data-field="wins_ricky">+</button>
+                    </div>
+                </td>
+                <td class="counter-cell">
+                    <div class="counter-widget">
+                        <button type="button" class="counter-btn decrement" data-field="losses_ricky">−</button>
+                        <span class="counter-value" data-field-display="losses_ricky">{{ lr }}</span>
+                        <button type="button" class="counter-btn increment" data-field="losses_ricky">+</button>
+                    </div>
+                </td>
+                <td class="wr-cell" data-wr="ricky">—</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</figure>
+
+{% endblock %}

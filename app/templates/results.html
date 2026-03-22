@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block page_id %}results{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>my results</h1>
+    <div class="page-header-right">
+        <span>last updated: {{ last_updated or 'never' }}</span>
+        <a href="/results" class="btn-neutral">refresh</a>
+    </div>
+</div>
+
+{% if not stats or stats.completed == 0 %}
+<p>no matchup data yet. <a href="/enter">go to enter data</a> to start recording.</p>
+{% else %}
+
+{% if n_incomplete > 0 %}
+<div class="warning info-box">{{ n_incomplete }} matchup{{ 's' if n_incomplete != 1 }} ha{{ 's' if n_incomplete == 1 else 've' }} data but aren't included in analysis yet (need 5+ fights per condition).</div>
+{% endif %}
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="stat-label">matchups</div><div class="stat-value">{{ stats.completed }}</div></div>
+    <div class="stat-card"><div class="stat-label">control wr</div><div class="stat-value">{{ "%.1f"|format(stats.wr_control) }}%</div></div>
+    <div class="stat-card"><div class="stat-label">ricky wr</div><div class="stat-value">{{ "%.1f"|format(stats.wr_ricky) }}%</div></div>
+    <div class="stat-card"><div class="stat-label">mean wr diff</div><div class="stat-value {{ 'positive' if stats.mean_diff > 0 else 'negative' if stats.mean_diff < 0 else '' }}">{{ "%+.1f"|format(stats.mean_diff * 100) }}%</div></div>
+</div>
+
+{% set improved = [] %}
+{% set total_completed = [] %}
+{% for m in matchups %}
+    {% set ctrl_t = (m.wins_control or 0) + (m.losses_control or 0) %}
+    {% set rick_t = (m.wins_ricky or 0) + (m.losses_ricky or 0) %}
+    {% if ctrl_t >= 5 and rick_t >= 5 %}
+        {% if total_completed.append(1) %}{% endif %}
+        {% set ctrl_wr = (m.wins_control or 0) / ctrl_t %}
+        {% set rick_wr = (m.wins_ricky or 0) / rick_t %}
+        {% if rick_wr > ctrl_wr %}
+            {% if improved.append(1) %}{% endif %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+<div class="info-box">
+    <p><strong>verdict:</strong> ricky gave a higher win rate in <span class="{{ 'positive' if improved|length > total_completed|length / 2 else 'negative' if improved|length < total_completed|length / 2 else '' }}">{{ improved|length }}/{{ total_completed|length }}</span> completed matchups.</p>
+</div>
+
+<div class="info-box">
+    <h3>wilcoxon signed-rank test</h3>
+    <p>{{ wilcoxon.interpretation }}</p>
+    {% if wilcoxon.p_value is not none %}
+    <p><small>p-value: {{ "%.4f"|format(wilcoxon.p_value) }} | pairs: {{ wilcoxon.n_pairs }} ({{ wilcoxon.n_nonzero }} non-tied)</small></p>
+    {% endif %}
+</div>
+
+<div id="paired-bar-container"></div>
+<script type="application/json" id="paired-bar-data">{{ paired_bar_json | safe }}</script>
+
+<div id="trophy-scatter-container"></div>
+<script type="application/json" id="trophy-scatter-data">{{ trophy_scatter_json | safe }}</script>
+
+<h3>matchup details</h3>
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>defender</th>
+                <th>ctrl wins</th>
+                <th>ctrl losses</th>
+                <th>ctrl wr</th>
+                <th>ricky wins</th>
+                <th>ricky losses</th>
+                <th>ricky wr</th>
+                <th>wr diff</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in matchups | sort(attribute='wins_ricky', reverse=True) %}
+            {% set ctrl_t = (m.wins_control or 0) + (m.losses_control or 0) %}
+            {% set rick_t = (m.wins_ricky or 0) + (m.losses_ricky or 0) %}
+            {% set ctrl_wr = ((m.wins_control or 0) / ctrl_t * 100) if ctrl_t > 0 else 0 %}
+            {% set rick_wr = ((m.wins_ricky or 0) / rick_t * 100) if rick_t > 0 else 0 %}
+            {% set wr_diff = rick_wr - ctrl_wr %}
+            <tr>
+                <td>{{ m.defender_name }}</td>
+                <td>{{ m.wins_control }}</td>
+                <td>{{ m.losses_control }}</td>
+                <td>{{ "%.0f"|format(ctrl_wr) if ctrl_t > 0 else "—" }}%</td>
+                <td>{{ m.wins_ricky }}</td>
+                <td>{{ m.losses_ricky }}</td>
+                <td>{{ "%.0f"|format(rick_wr) if rick_t > 0 else "—" }}%</td>
+                <td class="{{ 'positive' if wr_diff > 0 else 'negative' if wr_diff < 0 else '' }}">{{ "%+.0f"|format(wr_diff) if (ctrl_t > 0 and rick_t > 0) else "—" }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endif %}
+{% endblock %}

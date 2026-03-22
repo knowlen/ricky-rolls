@@ -23,7 +23,6 @@
 {% set total_officers = per_officer_stats | length %}
 
 <h3>verdict</h3>
-<div class="results-viewport">
 {% if total_officers > 0 %}
 <div class="info-box">
     <h4>direction agreement</h4>
@@ -43,7 +42,6 @@
     {% if pooled_wilcoxon.p_value is not none %}
     <p><small>p-value: {{ "%.4f"|format(pooled_wilcoxon.p_value) }} | pairs: {{ pooled_wilcoxon.n_pairs }} ({{ pooled_wilcoxon.n_nonzero }} non-tied)</small></p>
     {% endif %}
-</div>
 </div>
 
 {% if n_incomplete > 0 %}

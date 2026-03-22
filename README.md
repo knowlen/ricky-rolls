@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="app/static/logo.webp" alt="Ricky Rolls" width="200">
+  <img src="app/static/logo.webp" alt="Ricky Rolls" width="150">
 </p>
 
-# Ricky Rolls
+<h1 align="center">Ricky Rolls</h1>
 
 A/B test data collection and analysis app for comparing win rates with and without hero "Ricky" in PVP idle game matchups.
 

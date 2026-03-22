@@ -34,7 +34,7 @@
 {% endfor %}
 <h3>verdict</h3>
 <div class="info-box">
-    <p>{{ wilcoxon.interpretation }}</p>
+    <p>{{ wilcoxon.interpretation | replace("improves", '<span class="positive">improves</span>') | replace("hurts", '<span class="negative">hurts</span>') | safe }}</p>
     {% if wilcoxon.p_value is not none %}
     <p><small><span title="wilcoxon signed-rank test">p-value</span>: {{ "%.4f"|format(wilcoxon.p_value) }} | pairs: {{ wilcoxon.n_pairs }} ({{ wilcoxon.n_nonzero }} non-tied)</small></p>
     {% endif %}

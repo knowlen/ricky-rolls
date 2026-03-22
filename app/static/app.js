@@ -29,7 +29,6 @@ function renderCharts() {
         responsive: true,
         displayModeBar: false,
         scrollZoom: false,
-        staticPlot: true,
       });
     } catch (_) {
       /* skip malformed chart data */

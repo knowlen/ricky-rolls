@@ -15,10 +15,11 @@ CHART_LAYOUT = dict(
     plot_bgcolor="#000000",
     paper_bgcolor="#000000",
     font=dict(family="JetBrains Mono", color="#ffffff", size=12),
-    xaxis=dict(gridcolor="#404040", linecolor="#404040", zerolinecolor="#404040"),
-    yaxis=dict(gridcolor="#404040", linecolor="#404040", zerolinecolor="#404040"),
+    xaxis=dict(gridcolor="#404040", linecolor="#404040", zerolinecolor="#404040", fixedrange=True),
+    yaxis=dict(gridcolor="#404040", linecolor="#404040", zerolinecolor="#404040", fixedrange=True),
     legend=dict(font=dict(color="#ffffff")),
     margin=dict(l=60, r=20, t=40, b=40),
+    dragmode=False,
 )
 
 DATA_COLORS = ["#ff9800", "#3498db", "#9c27b0", "#00bcd4", "#e6c730", "#e84393", "#808080"]

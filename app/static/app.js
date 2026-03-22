@@ -28,6 +28,8 @@ function renderCharts() {
       Plotly.newPlot(container, spec.data || [], spec.layout || {}, {
         responsive: true,
         displayModeBar: false,
+        scrollZoom: false,
+        staticPlot: true,
       });
     } catch (_) {
       /* skip malformed chart data */

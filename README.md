@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="app/static/logo.webp" alt="Ricky Rolls" width="200">
+</p>
+
 # Ricky Rolls
 
 A/B test data collection and analysis app for comparing win rates with and without hero "Ricky" in PVP idle game matchups.
@@ -10,15 +14,11 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Copy `.env.example` to `.env` and set your values:
+Optionally create a `.env` file to override defaults:
 
-```bash
-cp .env.example .env
-```
-
-- `SECRET_KEY`,random string for session signing
-- `ADMIN_KEY`,password for admin access
-- `DATABASE_PATH`,optional, defaults to `./data/data.db`
+- `SECRET_KEY`: random string for session signing (default: `dev-secret-change-me`)
+- `ADMIN_KEY`: password for admin access (default: `admin`)
+- `DATABASE_PATH`: SQLite path (default: `./data/data.db`)
 
 ## Run
 

@@ -29,7 +29,7 @@ def login_page(request: Request):
     if officer:
         return RedirectResponse(url="/enter", status_code=302)
     return templates.TemplateResponse(
-        "login.html", {"request": request, "officer": None, "nav_page": "login"}
+        name="login.html", request=request, context={"officer": None, "nav_page": "login"}
     )
 
 
@@ -61,9 +61,9 @@ def enter_page(request: Request, db: sqlite3.Connection = Depends(get_db)):
     }
 
     return templates.TemplateResponse(
-        "enter.html",
-        {
-            "request": request,
+        name="enter.html",
+        request=request,
+        context={
             "officer": officer,
             "officer_meta": officer_meta,
             "defenders": [dict(d) for d in defenders],
@@ -119,9 +119,9 @@ def results_page(request: Request, db: sqlite3.Connection = Depends(get_db)):
     last_updated = row["last_updated"] if row else None
 
     return templates.TemplateResponse(
-        "results.html",
-        {
-            "request": request,
+        name="results.html",
+        request=request,
+        context={
             "officer": officer,
             "matchups": officer_matchups,
             "stats": stats,
@@ -208,9 +208,9 @@ def aggregate_page(request: Request, db: sqlite3.Connection = Depends(get_db)):
     last_updated = row["last_updated"] if row else None
 
     return templates.TemplateResponse(
-        "aggregate.html",
-        {
-            "request": request,
+        name="aggregate.html",
+        request=request,
+        context={
             "officer": officer,
             "all_matchups": all_matchups,
             "per_officer_stats": per_officer_stats,
@@ -295,8 +295,9 @@ def chart_page(
         back_url = "/results"
 
     return templates.TemplateResponse(
-        "chart.html",
-        {"request": request, "chart_json": chart_json, "back_url": back_url},
+        name="chart.html",
+        request=request,
+        context={"chart_json": chart_json, "back_url": back_url},
     )
 
 
@@ -338,9 +339,9 @@ def admin_page(request: Request, db: sqlite3.Connection = Depends(get_db)):
     matchups = [dict(row) for row in matchups]
 
     return templates.TemplateResponse(
-        "admin.html",
-        {
-            "request": request,
+        name="admin.html",
+        request=request,
+        context={
             "officer": officer,
             "officers": officers,
             "defenders": defenders,
